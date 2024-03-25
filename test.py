@@ -6,14 +6,15 @@ from fuzzywuzzy import process
 # Source: https://medium.com/@haydenfaulkner/extracting-frames-fast-from-a-video-using-opencv-and-python-73b9b7dc9661
 def extract_frames(video_path, frames_dir, overwrite=False, start=-1, end=-1, every=1):
     """
-    Extract frames from a video using OpenCVs VideoCapture
-    :param video_path: path of the video
-    :param frames_dir: the directory to save the frames
-    :param overwrite: to overwrite frames that already exist?
-    :param start: start frame
-    :param end: end frame
-    :param every: frame spacing
-    :return: count of images saved
+    Extracts frames from a video file and saves them to a directory.
+
+    :param video_path: The path to the video file.
+    :param frames_dir: The directory where extracted frames will be saved.
+    :param overwrite: If True, overwrite existing frames. Default is False.
+    :param start: The starting frame number for extraction. Default is -1 (start from the beginning).
+    :param end: The ending frame number for extraction. Default is -1 (go till the end).
+    :param every: Extract every nth frame. Default is 1 (extract every frame).
+    :return: The count of frames saved.
     """
 
     video_path = os.path.normpath(video_path)  # make the paths OS (Windows) compatible
@@ -87,6 +88,14 @@ def extract_frames(video_path, frames_dir, overwrite=False, start=-1, end=-1, ev
 # Source: https://medium.com/@patelharsh7458/python-script-which-compare-two-images-and-determine-if-they-are-the
 # -same-even-when-one-of-them-is-ee3c8df2a29b
 def compare_images(image1_path, image2_path):
+    """
+    Compares two images and calculates a similarity score based on keypoint matching.
+
+    :param image1_path: The file path of the image you want to compare.
+    :param image2_path: The file path of the image that is being compared.
+    :return: The match score indicating the similarity between the two images.
+    """
+
     # Load the two images
     image1 = cv2.imread(image1_path)
     image2 = cv2.imread(image2_path)
@@ -137,6 +146,13 @@ def compare_images(image1_path, image2_path):
 
 
 def get_filepaths(directory):
+    """
+    Retrieves the file paths of all files in the specified directory.
+
+    :param directory: The directory from which to list file paths.
+    :return: A list of file paths.
+    """
+
     # List to store file paths
     file_paths = []
 
@@ -151,11 +167,24 @@ def get_filepaths(directory):
 
 
 def rm_file_extension(filename):
+    """
+    Removes the file extension from a filename.
+
+    :param filename: The filename from which to remove the extension.
+    :return: The filename without its extension.
+    """
     file_wo_extension = os.path.splitext(filename)[0]
     return file_wo_extension
 
 
 def get_matching_files(path_to_frames, path_to_labels):
+    """
+    Matches frame subdirectories to label images using fuzzy string matching.
+
+    :param path_to_frames: The directory containing frame subdirectories.
+    :param path_to_labels: The directory containing label images.
+    :return: A tuple containing a dictionary of matches and a list of frame subdirectories.
+    """
     # Define a minimum similarity score threshold (0-100)
     similarity_threshold = 70  # Adjust this value as needed
 
@@ -186,18 +215,30 @@ def get_matching_files(path_to_frames, path_to_labels):
 
 
 def get_unmentioned_paths(directory, dictionary):
+    """
+    Finds file paths in the specified directory that are not mentioned in the given dictionary.
+
+    :param directory: The directory to search within.
+    :param dictionary: A dictionary containing mentioned file paths as values.
+    :return: A list of file paths not mentioned in the dictionary.
+    """
     # Step 1: List all files in the target directory
     all_files = set()
-    for root, dirs, files in os.walk(directory):  # Adjust 'TestFrames' to your target directory
+    for root, dirs, files in os.walk(directory):  # Adjust 'directory' to your target directory
         for file in files:
             # Construct the full path and add it to the set
-            full_path = os.path.join(root, file)
+            # Ensure paths are normalized for consistency
+            full_path = os.path.normpath(os.path.join(root, file))
             all_files.add(full_path)
 
     # Step 2: Gather all mentioned paths from your dictionary
-    mentioned_paths = set(dictionary.values())
+    # Filter out empty strings and normalize paths
+    mentioned_paths = set(os.path.normpath(path) for path in dictionary.values() if path)
 
     # Step 3: Find the difference - paths in all_files but not in mentioned_paths
     not_mentioned_paths = list(all_files - mentioned_paths)
+
+    # Optionally sort the list if you need an ordered result
+    not_mentioned_paths.sort()
 
     return not_mentioned_paths
