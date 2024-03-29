@@ -1,7 +1,9 @@
 AVP XC Skiing Data/
 Frames/
-Pictures
-Video/
+Label_Images/
+TestVideo/
+Videos/
+Labels/
 /.idea/.gitignore
 /.idea/misc.xml
 /.idea/inspectionProfiles/profiles_settings.xml
