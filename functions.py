@@ -1,5 +1,7 @@
 import cv2
 import os
+import numpy as np
+import json
 from fuzzywuzzy import process
 
 
@@ -85,64 +87,129 @@ def extract_frames(video_path, frames_dir, overwrite=False, start=-1, end=-1, ev
     return saved_count  # and return the count of the images we saved
 
 
-# Source: https://medium.com/@patelharsh7458/python-script-which-compare-two-images-and-determine-if-they-are-the
-# -same-even-when-one-of-them-is-ee3c8df2a29b
+def process_subdirectory(directory_to_go_through, match_dictionary,
+                         frames_dir, labels_dir):
+    """
+    Processes a single subdirectory within frames_dir by comparing its images
+    against a set of label images and generating a JSON file with the comparison results.
+
+    :param directory_to_go_through: The name of the subdirectory to process.
+    :param match_dictionary: A dictionary with keys as subdirectory names and values as lists of matching label image filenames.
+    :param frames_dir: The root directory containing frame subdirectories.
+    :param labels_dir: The directory containing label images to compare against the frames.
+
+    If a 'labels.json' file already exists in the subdirectory, the function will skip processing.
+    The function writes a 'labels.json' file containing matched image paths and unmentioned paths.
+    """
+
+    # Retrieve list of label images that match the current subdirectory
+    if directory_to_go_through not in match_dictionary:
+        print("No match for " + directory_to_go_through)
+        return  # Exit the function if there are no matches.
+
+    # Retrieve the list of label images that match the current subdirectory.
+    label_images = match_dictionary[directory_to_go_through]
+
+    # Build the full file path to the current subdirectory of frames.
+    path = os.path.join(frames_dir, directory_to_go_through)
+
+    # Get all image file paths within the current subdirectory
+    image_paths = get_filepaths(path)  # yields something like 'Frames/1_Petzold Luca_lq/0001.jpg...110.jpg'
+
+    # Initialize a flag to indicate whether to skip processing for the current subdir
+    skip_subdir = False
+
+    # Check if the subdirectory should be skipped because 'labels.json' already exists.
+    skip_subdir = any(i.endswith('labels.json') for i in image_paths)
+    if skip_subdir:
+        print("Skipping subdirectory because labels.json exists.")
+        return  # Skip further processing for this subdirectory.
+
+    # If skip_subdir is True, skip the rest of the processing for this subdir
+    if skip_subdir:
+        return
+
+    # Initialize structures for storing match results and their corresponding scores.
+    match_dictionary = {str(i): '' for i in range(1, 6)}
+    image_scores = {str(i): 0 for i in range(1, 6)}
+
+    # Map the endings of label filenames to keys in match_dictionary and image_scores.
+    label_endings_to_keys = {f'00{i}.jpg': str(i) for i in range(1, 6)}
+
+    # Iterate over each image path within the current subdirectory
+    for img in image_paths:
+        # Compare the current image with each label image
+        for label_filename in label_images:
+            # Construct the full path to the current label image
+            label = os.path.join(labels_dir, label_filename)
+            # Compute the similarity score between the current frame and label image
+            similarity_score = compare_images(img, label)
+
+            # Update dictionary and scores if the current score is higher.
+            for ending, key in label_endings_to_keys.items():
+                if label_filename.endswith(ending) and similarity_score > image_scores[key]:
+                    image_scores[key] = similarity_score
+                    match_dictionary[key] = img
+                    break  # Stop checking once a match is updated.
+
+            print(match_dictionary)
+
+    # Get paths of images that were not matched to any label.
+    unmentioned_paths = get_unmentioned_paths(path, match_dictionary)
+
+    # Combine matched paths and unmentioned paths into a structured data for JSON
+    # Compile the matching results into a single data structure.
+    combined_data = {**match_dictionary, "0": unmentioned_paths}
+
+    # Create the path for the resulting JSON file in the current subdirectory.
+    json_filepath = os.path.join(path, "labels.json")
+
+    # Write the match results to the JSON file.
+    with open(json_filepath, 'w') as json_file:
+        json.dump(combined_data, json_file, indent=4)
+
+
+# Inspirational Source: https://medium.com/@patelharsh7458/python-script-which-compare-two-images-and-determine-if
+# -they-are-the -same-even-when-one-of-them-is-ee3c8df2a29b
 def compare_images(image1_path, image2_path):
     """
-    Compares two images and calculates a similarity score based on keypoint matching.
+    Compares two images and calculates a similarity score based on filtered keypoint matching.
 
-    :param image1_path: The file path of the image you want to compare.
-    :param image2_path: The file path of the image that is being compared.
-    :return: The match score indicating the similarity between the two images.
+    :param image1_path: Path to the first image file.
+    :param image2_path: Path to the second image file.
+    :return: Number of good matches after filtering and verification.
     """
+    # Load images in grayscale
+    image1 = cv2.imread(image1_path, cv2.IMREAD_GRAYSCALE)
+    image2 = cv2.imread(image2_path, cv2.IMREAD_GRAYSCALE)
 
-    # Load the two images
-    image1 = cv2.imread(image1_path)
-    image2 = cv2.imread(image2_path)
-
-    # Convert images to grayscale
-    gray1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
-    gray2 = cv2.cvtColor(image2, cv2.COLOR_RGB2GRAY)
-
-    # Initialize the ORB (Oriented FAST and Rotated BRIEF) detector
+    # Initialize ORB detector
     orb = cv2.ORB.create(nfeatures=5000)
 
-    # Find keypoints and descriptors in both images
-    kp1, des1 = orb.detectAndCompute(gray1, None)
-    kp2, des2 = orb.detectAndCompute(gray2, None)
+    # Find key points and descriptors with ORB
+    kp1, des1 = orb.detectAndCompute(image1, None)
+    kp2, des2 = orb.detectAndCompute(image2, None)
 
-    # Create a BFMatcher (Brute Force Matcher)
-    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    # Create BFMatcher object and find the k best matches for each descriptor
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING)
+    matches = bf.knnMatch(des1, des2, k=2)
 
-    # Match descriptors
-    matches = bf.match(des1, des2)
+    # Apply ratio test to filter matches
+    good_matches = [m for m, n in matches if m.distance < 0.75 * n.distance]
 
-    # Sort them by distance (smaller distances are better)
-    matches = sorted(matches, key=lambda x: x.distance)
+    # Homography check
+    if len(good_matches) > 4:
+        src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+        dst_pts = np.float32([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
 
-    # Calculate a match score
-    match_score = len(matches)
+        # Find homography matrix and perform RANSAC
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+        matchesMask = mask.ravel().tolist()
 
-    # print ("Match Score: ", match_score)
-
-    # You can adjust a threshold here to determine if the images are the same
-    # Smaller threshold values may yield more lenient matching.
-    # threshold = 453 # Adjust as needed
-
-    # if match_score > threshold:
-    #     print("Image Nr.: ", image1_path)
-    #     print("Images are similar.")
-    # else:
-    #     print("Images are not similar.")
-
-    # Visualization (optional)
-    # result_image = cv2.drawMatches(image1, kp1, image2, kp2, matches[:10], outImg=None)
-
-    # cv2.imshow("Result Image", result_image)
-    # cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-    return match_score
+        # Count the number of inliers (matches that fit the homography)
+        return np.sum(matchesMask)
+    else:
+        return 0
 
 
 def get_filepaths(directory):
@@ -196,7 +263,7 @@ def get_matching_files(path_to_frames, path_to_labels):
     matches = {}
     for subdir in subdirs:
         # Use fuzzy matching to find all file matches above the threshold
-        all_matches = process.extract(subdir, labels, limit=6)
+        all_matches = process.extract(subdir, labels, limit=5)
 
         # Filter matches by the similarity score threshold
         # good_matches = [match for match in all_matches if match[1] >= similarity_threshold]
@@ -206,7 +273,7 @@ def get_matching_files(path_to_frames, path_to_labels):
 
         # Print and store the good matches (filenames only)
         if good_matches:
-            print(f"Good matches for '{subdir}': {good_matches}")
+            # print(f"Good matches for '{subdir}': {good_matches}")
             matches[subdir] = good_matches
         else:
             print(f"No good matches found for '{subdir}'")
@@ -223,13 +290,17 @@ def get_unmentioned_paths(directory, dictionary):
     :return: A list of file paths not mentioned in the dictionary.
     """
     # Step 1: List all files in the target directory
-    all_files = set()
-    for root, dirs, files in os.walk(directory):  # Adjust 'directory' to your target directory
-        for file in files:
-            # Construct the full path and add it to the set
-            # Ensure paths are normalized for consistency
-            full_path = os.path.normpath(os.path.join(root, file))
-            all_files.add(full_path)
+    all_files = set(get_filepaths(directory))
+
+    print(all_files)
+    # for root, dirs, files in os.walk(directory):  # Adjust 'directory' to your target directory
+    #     for file in files:
+    #         # Construct the full path and add it to the set
+    #         # Ensure paths are normalized for consistency
+    #         full_path = os.path.normpath(os.path.join(root, file))
+    #
+    #         print(full_path)
+    #         all_files.add(full_path)
 
     # Step 2: Gather all mentioned paths from your dictionary
     # Filter out empty strings and normalize paths
