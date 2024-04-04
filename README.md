@@ -26,30 +26,31 @@ The repository includes Python scripts for data processing and analysis, as well
 
 ## Step-by-Step Introduction
 
-### Feature Extraction Algorithm 1.1 (featureExtraction.py)
+### 1.1 Feature Extraction Algorithm (featureExtraction.py)
 
-#### 1. Frame Extraction
+#### 1.1.1 Frame Extraction
 
-#### 2. Image Comparison
+#### 1.1.2 Image Comparison
 
 Good Match:
 ![comparison_result_3](https://github.com/magictoene/BachelorThesis/assets/101808762/7f242dfa-b280-48c2-991a-0d8f7fb16186)
+<img src="https://github.com/magictoene/BachelorThesis/assets/101808762/7f242dfa-b280-48c2-991a-0d8f7fb16186" width="100" height="100">
 
 Bad Match:
 ![comparison_result](https://github.com/magictoene/BachelorThesis/assets/101808762/ecc257fb-8439-40fa-85b8-a57cd85c04eb)
 
 
-#### 3. Label Declaration 
+#### 1.1.3. Label Declaration 
 
 
-### Feature Extraction 1.2 (poseEstimation.py)
+### 1.2 Feature Extraction (poseEstimation.py)
 
-#### 1. Object Detection
+#### 1.2.1 Object Detection
 
-#### 2. Pose Estimation
+#### 1.2.2 Pose Estimation
 
 
-### Neural Network Training
+### 2 Neural Network Training
 
 
 ## Reasoning behind Library Choices
