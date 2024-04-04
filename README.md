@@ -30,7 +30,7 @@ The repository includes Python scripts for data processing and analysis, as well
 
 #### 1. Frame Extraction
 
-#### 2. Image comparison
+#### 2. Image Comparison
 
 Good Match:
 ![comparison_result_3](https://github.com/magictoene/BachelorThesis/assets/101808762/7f242dfa-b280-48c2-991a-0d8f7fb16186)
@@ -41,7 +41,7 @@ Bad Match:
 
 #### 3. Label Declaration 
 
-## Feature Extraction 1.2 (poseEstimation.py
+## Feature Extraction 1.2 (poseEstimation.py)
 
 #### 1. Object Detection
 
