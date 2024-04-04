@@ -41,7 +41,8 @@ Bad Match:
 
 #### 3. Label Declaration 
 
-## Feature Extraction 1.2 (poseEstimation.py)
+
+### Feature Extraction 1.2 (poseEstimation.py)
 
 #### 1. Object Detection
 
