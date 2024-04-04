@@ -34,8 +34,8 @@ The repository includes Python scripts for data processing and analysis, as well
 
 Good Match vs Bad Match:
 </br></br>
-<img src="https://github.com/magictoene/BachelorThesis/assets/101808762/7f242dfa-b280-48c2-991a-0d8f7fb16186" width="320" height="240">
-<img src="https://github.com/magictoene/BachelorThesis/assets/101808762/ecc257fb-8439-40fa-85b8-a57cd85c04eb" width="320" height="240">
+<img src="https://github.com/magictoene/BachelorThesis/assets/101808762/7f242dfa-b280-48c2-991a-0d8f7fb16186" width="480" height="360">
+<img src="https://github.com/magictoene/BachelorThesis/assets/101808762/ecc257fb-8439-40fa-85b8-a57cd85c04eb" width="480" height="360">
 
 
 
