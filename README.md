@@ -32,10 +32,12 @@ The repository includes Python scripts for data processing and analysis, as well
 
 #### 1.1.2 Image Comparison
 
-Good Match:
+Good Match: 
+</br></br>
 <img src="https://github.com/magictoene/BachelorThesis/assets/101808762/7f242dfa-b280-48c2-991a-0d8f7fb16186" width="640" height="480">
 
-Bad Match:
+Bad Match: 
+</br></br>
 <img src="https://github.com/magictoene/BachelorThesis/assets/101808762/ecc257fb-8439-40fa-85b8-a57cd85c04eb" width="640" height="480">
 
 
