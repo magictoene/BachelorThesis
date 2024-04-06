@@ -24,7 +24,32 @@ The repository includes Python scripts for data processing and analysis, as well
 
 ![Beige Colorful Minimal Flowchart Infographic Graph (2)](https://github.com/magictoene/BachelorThesis/assets/101808762/10795bfc-1ac6-4575-8d4e-4f546db2617e)
 
+## Step-by-Step Introduction
 
+### 1.1 Feature Extraction Algorithm (featureExtraction.py)
+
+#### 1.1.1 Frame Extraction
+
+#### 1.1.2 Image Comparison
+
+Good Match vs Bad Match:
+</br></br>
+<img src="https://github.com/magictoene/BachelorThesis/assets/101808762/7f242dfa-b280-48c2-991a-0d8f7fb16186" width="480" height="360">
+<img src="https://github.com/magictoene/BachelorThesis/assets/101808762/ecc257fb-8439-40fa-85b8-a57cd85c04eb" width="480" height="360">
+
+
+
+#### 1.1.3. Label Declaration 
+
+
+### 1.2 Feature Extraction (poseEstimation.py)
+
+#### 1.2.1 Object Detection
+
+#### 1.2.2 Pose Estimation
+
+
+### 2 Neural Network Training
 
 
 ## Reasoning behind Library Choices
@@ -36,6 +61,7 @@ FuzzyWuzzy
 Ultralytics YOLOv8
 
 JSON
+
 
 
 
