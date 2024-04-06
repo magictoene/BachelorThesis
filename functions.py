@@ -3,9 +3,11 @@ import os
 import numpy as np
 import json
 from fuzzywuzzy import process
+import matplotlib.pyplot as plt
 
 
 # Source: https://medium.com/@haydenfaulkner/extracting-frames-fast-from-a-video-using-opencv-and-python-73b9b7dc9661
+# Reworked with ChatGPT for better performance and error handling
 def extract_frames(video_path, frames_dir, overwrite=False, start=-1, end=-1, every=1):
     """
     Extracts frames from a video file and saves them to a directory.
@@ -87,6 +89,7 @@ def extract_frames(video_path, frames_dir, overwrite=False, start=-1, end=-1, ev
     return saved_count  # and return the count of the images we saved
 
 
+# Reworked with ChatGPT for better performance
 def process_subdirectory(directory_to_go_through, match_dictionary,
                          frames_dir, labels_dir):
     """
@@ -169,8 +172,9 @@ def process_subdirectory(directory_to_go_through, match_dictionary,
         json.dump(combined_data, json_file, indent=4)
 
 
-# Inspirational Source: https://medium.com/@patelharsh7458/python-script-which-compare-two-images-and-determine-if
+# Source: https://medium.com/@patelharsh7458/python-script-which-compare-two-images-and-determine-if
 # -they-are-the -same-even-when-one-of-them-is-ee3c8df2a29b
+# Reworked with ChatGPT for higher accuracy
 def compare_images(image1_path, image2_path):
     """
     Compares two images and calculates a similarity score based on filtered keypoint matching.
@@ -206,12 +210,76 @@ def compare_images(image1_path, image2_path):
         M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
         matchesMask = mask.ravel().tolist()
 
+        # draw_keypoints_and_matches(image1, image2, kp1, kp2, good_matches, image1_path, image2_path)
+
         # Count the number of inliers (matches that fit the homography)
         return np.sum(matchesMask)
     else:
         return 0
 
 
+# Source of Inspiration: ChatGPT
+# This function is used to generate exemplary images for GitHub
+def draw_keypoints_and_matches(img1, img2, keypoints1, keypoints2, matches, image1_path, image2_path):
+    """
+    Draw keypoints on both images and good matches between them using Matplotlib,
+    including scaling keypoints for resized images and options to save the comparison.
+
+    :param img1: The first image.
+    :param img2: The second image.
+    :param keypoints1: Keypoints in the first image.
+    :param keypoints2: Keypoints in the second image.
+    :param matches: Filtered good matches between keypoints.
+    :param image1_path: Path to the first image file for title display.
+    :param image2_path: Path to the second image file for title display.
+    """
+    scale_percent = 39  # Example scale percentage for resizing
+
+    # Resize images
+    image1_resized = resize_image(img1, scale_percent)
+
+    # Scale keypoints coordinates
+    kp1_scaled = [cv2.KeyPoint(kp.pt[0] * scale_percent / 100, kp.pt[1] * scale_percent / 100, kp.size) for kp in keypoints1]
+
+    # Draw good matches on the resized images with scaled keypoints
+    img_matches = cv2.drawMatches(image1_resized, kp1_scaled, img2, keypoints2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+
+    # Convert images to RGB for Matplotlib
+    img_matches_rgb = cv2.cvtColor(img_matches, cv2.COLOR_BGR2RGB)
+
+    # Use Matplotlib to display the images
+    fig = plt.figure()
+    plt.imshow(img_matches_rgb)
+
+    plt.title(f"Image Comparison: {os.path.split(image1_path)[1]} vs. {os.path.split(image2_path)[1]}")
+    plt.yticks([])
+    plt.xticks([])
+
+    # Option to save the figure
+    save_fig = input("Do you want to save this comparison? (yes/no): ").lower()
+    if save_fig == 'yes':
+        save_path = os.path.split(image1_path)[0] + "\\" + "comparison_result.jpg"
+        fig.savefig(save_path, format='jpg', dpi=600)
+        print(f"Comparison saved to {save_path}")
+
+    plt.show()
+
+def resize_image(image, scale_percent):
+    """
+    Resizes an image by a specific scale percentage.
+
+    :param image: The image to resize.
+    :param scale_percent: The desired scale percentage.
+    :return: The resized image.
+    """
+    width = int(image.shape[1] * scale_percent / 100)
+    height = int(image.shape[0] * scale_percent / 100)
+    dim = (width, height)
+
+    return cv2.resize(image, dim, interpolation=cv2.INTER_AREA)
+
+
+# Source of Inspiration: ChatGPT
 def get_filepaths(directory):
     """
     Retrieves the file paths of all files in the specified directory.
@@ -244,6 +312,7 @@ def rm_file_extension(filename):
     return file_wo_extension
 
 
+# Source of Inspiration: ChatGPT
 def get_matching_files(path_to_frames, path_to_labels):
     """
     Matches frame subdirectories to label images using fuzzy string matching.
@@ -265,15 +334,12 @@ def get_matching_files(path_to_frames, path_to_labels):
         # Use fuzzy matching to find all file matches above the threshold
         all_matches = process.extract(subdir, labels, limit=5)
 
-        # Filter matches by the similarity score threshold
-        # good_matches = [match for match in all_matches if match[1] >= similarity_threshold]
-
         # Filter matches by the similarity score threshold and extract only filenames
         good_matches = [match[0] for match in all_matches if match[1] >= similarity_threshold]
 
         # Print and store the good matches (filenames only)
         if good_matches:
-            # print(f"Good matches for '{subdir}': {good_matches}")
+            # print(f"Good matches for '{subdir}': {matches}")
             matches[subdir] = good_matches
         else:
             print(f"No good matches found for '{subdir}'")
@@ -281,6 +347,7 @@ def get_matching_files(path_to_frames, path_to_labels):
     return matches, subdirs
 
 
+# Source of Inspiration: ChatGPT
 def get_unmentioned_paths(directory, dictionary):
     """
     Finds file paths in the specified directory that are not mentioned in the given dictionary.
@@ -293,14 +360,6 @@ def get_unmentioned_paths(directory, dictionary):
     all_files = set(get_filepaths(directory))
 
     print(all_files)
-    # for root, dirs, files in os.walk(directory):  # Adjust 'directory' to your target directory
-    #     for file in files:
-    #         # Construct the full path and add it to the set
-    #         # Ensure paths are normalized for consistency
-    #         full_path = os.path.normpath(os.path.join(root, file))
-    #
-    #         print(full_path)
-    #         all_files.add(full_path)
 
     # Step 2: Gather all mentioned paths from your dictionary
     # Filter out empty strings and normalize paths
