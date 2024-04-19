@@ -71,7 +71,7 @@ def extract_frames(video_path, frames_dir, overwrite=False, start=-1, end=-1, ev
             except OSError as error:
                 print(f"Error creating directory: {error}")
 
-            path = os.path.join(save_path, "{:04d}.jpg".format(frame))  # create the save path
+            path = os.path.join(save_path, "{:04d}.png".format(frame))  # create the save path
 
             #  print(path)
             if not os.path.exists(path) or overwrite:  # if it doesn't exist, or we want to overwrite anyway
@@ -117,7 +117,7 @@ def process_subdirectory(directory_to_go_through, match_dictionary,
     path = os.path.join(frames_dir, directory_to_go_through)
 
     # Get all image file paths within the current subdirectory
-    image_paths = get_filepaths(path)  # yields something like 'Frames/1_Petzold Luca_lq/0001.jpg...110.jpg'
+    image_paths = get_filepaths(path)  # yields something like 'Frames/1_Petzold Luca_lq/0001.png...110.png'
 
     # Initialize a flag to indicate whether to skip processing for the current subdir
     skip_subdir = False
@@ -258,8 +258,8 @@ def draw_keypoints_and_matches(img1, img2, keypoints1, keypoints2, matches, imag
     # Option to save the figure
     save_fig = input("Do you want to save this comparison? (yes/no): ").lower()
     if save_fig == 'yes':
-        save_path = os.path.split(image1_path)[0] + "\\" + "comparison_result.jpg"
-        fig.savefig(save_path, format='jpg', dpi=600)
+        save_path = os.path.split(image1_path)[0] + "\\" + "comparison_result.svg"
+        fig.savefig(save_path, format='svg', dpi=600)
         print(f"Comparison saved to {save_path}")
 
     plt.show()
