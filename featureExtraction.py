@@ -10,7 +10,7 @@ videos_dir = "Videos"
 extract = False
 
 # Obtain a list of all video file paths within the specified videos directory
-video_paths = get_filepaths(videos_dir)  # "Videos" for all paths and not just for a single TestVideo
+video_paths = get_filepaths(videos_dir, extension='mp4')  # "Videos" for all paths and not just for a single TestVideo
 
 # Iterate over each video path to extract frames
 if extract:

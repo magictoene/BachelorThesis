@@ -119,9 +119,6 @@ def process_subdirectory(directory_to_go_through, match_dictionary,
     # Get all image file paths within the current subdirectory
     image_paths = get_filepaths(path)  # yields something like 'Frames/1_Petzold Luca_lq/0001.png...110.png'
 
-    # Initialize a flag to indicate whether to skip processing for the current subdir
-    skip_subdir = False
-
     # Check if the subdirectory should be skipped because 'labels.json' already exists.
     skip_subdir = any(i.endswith('labels.json') for i in image_paths)
     if skip_subdir:
@@ -239,10 +236,12 @@ def draw_keypoints_and_matches(img1, img2, keypoints1, keypoints2, matches, imag
     image1_resized = resize_image(img1, scale_percent)
 
     # Scale keypoints coordinates
-    kp1_scaled = [cv2.KeyPoint(kp.pt[0] * scale_percent / 100, kp.pt[1] * scale_percent / 100, kp.size) for kp in keypoints1]
+    kp1_scaled = [cv2.KeyPoint(kp.pt[0] * scale_percent / 100, kp.pt[1] * scale_percent / 100, kp.size) for kp in
+                  keypoints1]
 
     # Draw good matches on the resized images with scaled keypoints
-    img_matches = cv2.drawMatches(image1_resized, kp1_scaled, img2, keypoints2, matches, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    img_matches = cv2.drawMatches(image1_resized, kp1_scaled, img2, keypoints2, matches, None,
+                                  flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
     # Convert images to RGB for Matplotlib
     img_matches_rgb = cv2.cvtColor(img_matches, cv2.COLOR_BGR2RGB)
@@ -264,6 +263,7 @@ def draw_keypoints_and_matches(img1, img2, keypoints1, keypoints2, matches, imag
 
     plt.show()
 
+
 def resize_image(image, scale_percent):
     """
     Resizes an image by a specific scale percentage.
@@ -280,12 +280,17 @@ def resize_image(image, scale_percent):
 
 
 # Source of Inspiration: ChatGPT
-def get_filepaths(directory):
+def get_filepaths(directory, extension=None):
     """
-    Retrieves the file paths of all files in the specified directory.
+    Retrieves the file paths of all files in the specified directory,
+    optionally filtering by file extension. If only one file is found,
+    returns a single string. Otherwise, returns a list of file paths.
 
     :param directory: The directory from which to list file paths.
-    :return: A list of file paths.
+    :param extension: Optional. Specify the file extension to filter by (e.g., 'json').
+                      The extension should be provided without a dot.
+    :return: A single file path as a string if only one file is found,
+             or a list of file paths if multiple files are found.
     """
 
     # List to store file paths
@@ -295,10 +300,19 @@ def get_filepaths(directory):
     for filename in os.listdir(directory):
         # Construct full file path
         file_path = os.path.join(directory, filename)
-        if os.path.isfile(file_path):  # Check if it's a file and not a directory
-            file_paths.append(file_path)
+        # Check if it's a file and not a directory
+        if os.path.isfile(file_path):
+            # If an extension is specified, filter files by the extension
+            if extension and filename.endswith('.' + extension):
+                file_paths.append(file_path)
+            elif not extension:  # If no extension is specified, add all files
+                file_paths.append(file_path)
 
-    return file_paths
+    # Return a single file path as a string if only one is found, otherwise return the list
+    if len(file_paths) == 1:
+        return file_paths[0]
+    else:
+        return file_paths
 
 
 def rm_file_extension(filename):
@@ -372,3 +386,22 @@ def get_unmentioned_paths(directory, dictionary):
     not_mentioned_paths.sort()
 
     return not_mentioned_paths
+
+
+# Source of Inspiration: ChatGPT
+def calculate_distance_travelled(box1, box2):
+    """ Calculate Euclidean distance between the centroids of two bounding boxes. """
+    x1, y1, w1, h1 = box1
+    x2, y2, w2, h2 = box2
+    centroid1 = (x1 + w1 / 2, y1 + h1 / 2)
+    centroid2 = (x2 + w2 / 2, y2 + h2 / 2)
+    return np.sqrt((centroid2[0] - centroid1[0]) ** 2 + (centroid2[1] - centroid1[1]) ** 2)
+
+
+def simplify_filename(filepath):
+    # Extract the filename without any directory path
+    filename = os.path.basename(filepath)
+    # Remove the file extension
+    simplified_filename, _ = os.path.splitext(filename)
+
+    return simplified_filename
