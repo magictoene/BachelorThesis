@@ -25,6 +25,7 @@ for xcs_video in video_paths:
     ids = []
     bboxes = []
     kps = []
+
     kp_confs = []
 
     # Assume `video_results` is a list where each element represents the results for a frame

@@ -1,0 +1,20 @@
+Total frames: 49560
+Frames with detection: 38695
+Keypoint detection details:
+Kp1: Average Confidence = 0.7074753720722817, Detection Count = 28157, Detection Percentage = 72.77%
+Kp2: Average Confidence = 0.6265239206226928, Detection Count = 1029, Detection Percentage = 2.66%
+Kp3: Average Confidence = 0.7573114140207591, Detection Count = 30915, Detection Percentage = 79.89%
+Kp4: Average Confidence = 0.7778274863958359, Detection Count = 368, Detection Percentage = 0.95%
+Kp5: Average Confidence = 0.8569862028570693, Detection Count = 36782, Detection Percentage = 95.06%
+Kp6: Average Confidence = 0.8999484046810458, Detection Count = 37729, Detection Percentage = 97.50%
+Kp7: Average Confidence = 0.9767559012447743, Detection Count = 37716, Detection Percentage = 97.47%
+Kp8: Average Confidence = 0.7157453866154599, Detection Count = 21140, Detection Percentage = 54.63%
+Kp9: Average Confidence = 0.9629270849948787, Detection Count = 37186, Detection Percentage = 96.10%
+Kp10: Average Confidence = 0.7117272688854065, Detection Count = 22790, Detection Percentage = 58.90%
+Kp11: Average Confidence = 0.9384431873251429, Detection Count = 37043, Detection Percentage = 95.73%
+Kp12: Average Confidence = 0.9674770879648495, Detection Count = 38244, Detection Percentage = 98.83%
+Kp13: Average Confidence = 0.982873937206161, Detection Count = 38174, Detection Percentage = 98.65%
+Kp14: Average Confidence = 0.962384061936459, Detection Count = 38219, Detection Percentage = 98.77%
+Kp15: Average Confidence = 0.9831589472542058, Detection Count = 38178, Detection Percentage = 98.66%
+Kp16: Average Confidence = 0.9385335770375585, Detection Count = 38142, Detection Percentage = 98.57%
+Kp17: Average Confidence = 0.9684814288724036, Detection Count = 38076, Detection Percentage = 98.40%
