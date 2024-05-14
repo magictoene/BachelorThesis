@@ -7,3 +7,4 @@ Videos/
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/vcs.xml
 test_functions.py
+/yolov8x-pose.pt
