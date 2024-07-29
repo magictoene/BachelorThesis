@@ -3,7 +3,7 @@ import json
 from ultralytics import YOLO
 import torch
 import pandas as pd
-from functions import get_filepaths, calculate_distance_travelled, simplify_filename
+from functions import get_filepaths, calculate_distance_travelled, simplify_filename, shear_video
 
 print(torch.cuda.is_available())
 
@@ -15,11 +15,39 @@ videos_dir = "Videos"
 # Obtain a list of all video file paths within the specified videos directory
 video_paths = get_filepaths(videos_dir)  # "Videos" for all paths and not just for a single TestVideo
 
+print(video_paths)
+
+augment_data = True
+augmentation_suffix = "_augmented_4"
+
 for xcs_video in video_paths:
 
     print("Current video path: ", xcs_video)
 
-    tracking_results = model.track(source=xcs_video, conf=0.5, show=False, save=False)  # tracking on video
+    if augment_data:
+
+        simplified_name = simplify_filename(xcs_video)
+
+        simplified_name += augmentation_suffix + ".mp4"
+        output_video_path = os.path.join(videos_dir, simplified_name)
+
+        sheared_video_path = shear_video(xcs_video, output_video_path)
+
+        tracking_results = model.track(source=sheared_video_path, conf=0.5, show=False, save=False)  # tracking on video
+
+        try:
+            # Remove the file
+            os.remove(sheared_video_path)
+            print(f"File '{sheared_video_path}' was deleted successfully.")
+        except FileNotFoundError:
+            print(f"The file '{sheared_video_path}' does not exist.")
+        except PermissionError:
+            print("Permission denied: You do not have the necessary permissions to delete the file.")
+        except OSError as error:
+            print(f"Error: {error}")
+
+    else:
+        tracking_results = model.track(source=xcs_video, conf=0.5, show=False, save=False)  # tracking on video
 
     frame_numbers = []
     ids = []
@@ -142,6 +170,19 @@ for xcs_video in video_paths:
         # Update the label in the DataFrame if the frame number exists in the index
         if frame_number in xcs_df.index:
             xcs_df.loc[frame_number, ['Label']] = int(label)
+
+    if augment_data:
+        simplified_name += augmentation_suffix
+        # Define the path where you want to create the directory
+        directory = os.path.join(frames_dir, simplified_name)
+
+        # Check if the directory already exists
+        if not os.path.exists(directory):
+            # Create the directory
+            os.mkdir(directory)
+            print(f"Directory '{directory}' created successfully.")
+        else:
+            print(f"Directory '{directory}' already exists.")
 
     xcs_csv_file_path = os.path.join(frames_dir, simplified_name, 'feature_extraction.csv')
 

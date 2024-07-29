@@ -4,6 +4,7 @@ import numpy as np
 import json
 from fuzzywuzzy import process
 import matplotlib.pyplot as plt
+import random
 
 
 # Source: https://medium.com/@haydenfaulkner/extracting-frames-fast-from-a-video-using-opencv-and-python-73b9b7dc9661
@@ -405,3 +406,64 @@ def simplify_filename(filepath):
     simplified_filename, _ = os.path.splitext(filename)
 
     return simplified_filename
+
+
+def shear_frame(frame, shear_factor):
+    """
+    Applies a horizontal shear to an image.
+    :param frame: input image
+    :param shear_factor: factor by which the image is sheared
+    :return: sheared image
+    """
+    rows, cols, _ = frame.shape
+
+    # Transformation matrix for shearing (shifting columns)
+    M = np.float32([
+        [1, shear_factor, 0],
+        [0, 1, 0]
+    ])
+
+    # Calculate new width to accommodate the maximum x-coordinate after shearing
+    new_width = cols + int(abs(shear_factor * rows))
+
+    # Apply the affine transformation using the matrix M
+    sheared_frame = cv2.warpAffine(frame, M, (new_width, rows))
+
+    return sheared_frame
+
+
+def shear_video(input_video_path, output_video_path):
+    # Open the input video
+    cap = cv2.VideoCapture(input_video_path)
+    # Get video properties
+    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+
+    # Generate a random shear factor between 0.1 and 0.2 for the entire video
+    random_shear_factor = random.uniform(0.2, 0.25)
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # or 'XVID'
+    new_width = frame_width + int(abs(random_shear_factor * frame_height))
+    out = cv2.VideoWriter(output_video_path, fourcc, fps, (new_width, frame_height))
+
+    # Read until video is completed
+    while (cap.isOpened()):
+        ret, frame = cap.read()
+        if ret:
+            # Shear the frame with the consistent random factor
+            sheared_frame = shear_frame(frame, random_shear_factor)
+
+            # Write the sheared frame
+            out.write(sheared_frame)
+        else:
+            break
+
+    # Release everything if job is finished
+    cap.release()
+    out.release()
+    cv2.destroyAllWindows()
+    print("Video processing complete and saved to", output_video_path)
+
+    return output_video_path
