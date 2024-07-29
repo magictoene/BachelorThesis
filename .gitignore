@@ -9,3 +9,12 @@ Videos/
 test_functions.py
 /yolov8x-pose.pt
 /Grenzfälle
+model.keras
+prediction_comp.png
+best_training_accuracy.eps
+best_training_loss.eps
+confusion_matrix.eps
+confusion_matrix_normalized.eps
+/runs
+/Test
+/TestVideo
